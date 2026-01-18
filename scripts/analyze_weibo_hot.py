@@ -73,7 +73,27 @@ def get_claude_analysis(client, topics: list) -> str:
         messages=[{"role": "user", "content": prompt}],
     )
 
-    return response.content[0].text
+    # 兼容 MiniMax 等第三方 API 的不同返回格式
+    content = response.content
+    if isinstance(content, list) and len(content) > 0:
+        first_item = content[0]
+        # 检查是否有 text 属性（标准 Anthropic 格式）
+        if hasattr(first_item, 'text'):
+            return first_item.text
+        # 检查是否有 thinking 属性（MiniMax ThinkingBlock）
+        elif hasattr(first_item, 'thinking') and first_item.thinking:
+            # 尝试从第二个 item 获取文本
+            if len(content) > 1 and hasattr(content[1], 'text'):
+                return content[1].text
+        # 检查 type 属性
+        elif hasattr(first_item, 'type'):
+            if first_item.type == 'text':
+                return getattr(first_item, 'text', str(first_item))
+            elif first_item.type == 'thinking':
+                if len(content) > 1:
+                    return getattr(content[1], 'text', str(content[1]))
+    # 直接尝试转字符串
+    return str(content)
 
 
 def generate_html_report(topics: list, analysis: dict, timestamp: str) -> str:
