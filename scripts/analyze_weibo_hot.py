@@ -24,6 +24,62 @@ DEBUG = os.environ.get("DEBUG", "false").lower() == "true"
 OUTPUT_DIR = Path("docs")
 
 
+def update_index_html(output_dir: Path):
+    """更新 index.html，列出所有报告"""
+    # 获取所有 HTML 报告文件
+    reports = []
+    for f in sorted(output_dir.glob("weibo-hot-*.html"), reverse=True):
+        name = f.stem
+        # 从文件名提取日期时间
+        date_str = name.replace("weibo-hot-", "")
+        # 格式化日期
+        try:
+            dt = datetime.strptime(date_str, "%Y-%m-%d-%H-%M")
+            date_formatted = dt.strftime("%Y年%m月%d日 %H:%M")
+        except:
+            date_formatted = date_str
+        reports.append({
+            "url": f.name,
+            "name": f"📊 {date_formatted} 微博热搜报告",
+            "date": date_formatted
+        })
+
+    # 生成 index.html
+    index_html = f'''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博热搜分析报告</title>
+    <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; background: #f5f5f5; }}
+        h1 {{ color: #333; text-align: center; }}
+        .subtitle {{ text-align: center; color: #666; margin-bottom: 30px; }}
+        .report-list {{ list-style: none; padding: 0; }}
+        .report-item {{ background: white; margin: 10px 0; padding: 15px 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
+        .report-item a {{ color: #0066cc; text-decoration: none; font-size: 18px; }}
+        .report-item a:hover {{ text-decoration: underline; }}
+        .report-date {{ color: #666; font-size: 14px; margin-top: 5px; }}
+        .refresh-btn {{ display: block; width: 200px; margin: 30px auto; padding: 10px 20px; background: #0066cc; color: white; text-align: center; border-radius: 8px; text-decoration: none; }}
+        .refresh-btn:hover {{ background: #0055aa; }}
+    </style>
+</head>
+<body>
+    <h1>📊 微博热搜分析报告</h1>
+    <p class="subtitle">自动生成 · 每日更新</p>
+    <ul class="report-list">
+{"".join([f'        <li class="report-item"><a href="{r["url"]}">{r["name"]}</a></li>' for r in reports])}
+    </ul>
+    <a href="./" class="refresh-btn">🔄 刷新列表</a>
+</body>
+</html>'''
+
+    index_path = output_dir / "index.html"
+    with open(index_path, "w", encoding="utf-8") as f:
+        f.write(index_html)
+    print(f"✅ 更新 index.html: {index_path}")
+
+
 def get_claude_analysis(client, topics: list) -> str:
     """调用 Claude 进行深度分析"""
     # 构建话题列表
@@ -338,6 +394,9 @@ def main():
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(md_content)
     print(f"✅ Markdown 报告: {md_path}")
+
+    # 更新 index.html
+    update_index_html(OUTPUT_DIR)
 
     # 4. 输出摘要
     print("\n" + "=" * 60)
