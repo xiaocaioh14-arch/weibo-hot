@@ -1,0 +1,72 @@
+name: 微博热搜分析 (Claude SDK)
+
+on:
+  schedule:
+    - cron: '0 9,15,21 * * *'  # 每天 9:00, 15:00, 21:00
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: '调试模式（使用模拟数据）'
+        required: false
+        default: 'false'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/weibo-hot.yml'
+      - '.agent/skills/weibo-hot-analyzer/**'
+      - 'requirements.txt'
+      - 'scripts/**'
+
+permissions:
+  contents: write
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run Weibo Hot Analysis
+        id: analysis
+        run: |
+          python scripts/analyze_weibo_hot.py
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_BASE_URL: ${{ secrets.ANTHROPIC_BASE_URL }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          WEIBO_API_KEY: ${{ secrets.WEIBO_API_KEY }}
+          DEBUG: ${{ github.event.inputs.debug || 'false' }}
+
+      - name: Commit and push reports
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # 检查是否有新报告生成
+          if [ -n "$(git status --porcelain weibo-hot-reports/)" ]; then
+            git add weibo-hot-reports/
+            git commit -m "微博热搜报告 $(date +%Y-%m-%d)"
+            git push
+            echo "✅ 报告已更新并推送"
+          else
+            echo "ℹ️ 暂无新报告生成"
+          fi
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ 微博热搜分析失败，请检查日志"

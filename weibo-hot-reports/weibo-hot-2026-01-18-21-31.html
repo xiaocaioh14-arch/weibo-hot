@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博热搜 Top 10 分析报告 - 2026-01-18</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #667eea;
+            --primary-light: #764ba2;
+            --bg: #f8fafc;
+            --card-bg: rgba(255,255,255,0.8);
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: rgba(102,126,234,0.2);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: Inter, "PingFang SC", sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            border-radius: 24px;
+            color: white;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(102,126,234,0.3);
+        }
+        .header h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .header .meta { opacity: 0.9; font-size: 0.95rem; }
+        .overview-table {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .overview-table h2 { color: var(--primary); margin-bottom: 1rem; font-size: 1.3rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; font-weight: 600; }
+        tr:hover { background: rgba(102,126,234,0.05); }
+        .badge { display: inline-block; padding: 0.25rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 500; }
+        .badge-entertainment { background: #fef3c7; color: #92400e; }
+        .badge-tech { background: #dbeafe; color: #1e40af; }
+        .badge-society { background: #dcfce7; color: #166534; }
+        .badge-sports { background: #fce7f3; color: #9d174d; }
+        .badge-finance { background: #fef9c3; color: #854d0e; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid var(--border);
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(102,126,234,0.15); }
+        .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .rank {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1rem;
+        }
+        .card-title { font-size: 1.1rem; font-weight: 600; flex: 1; }
+        .hot-value { font-size: 0.85rem; color: var(--text-light); }
+        .section-title { font-size: 0.9rem; font-weight: 600; color: var(--primary); margin: 1rem 0 0.5rem; }
+        .summary { color: var(--text-light); font-size: 0.9rem; line-height: 1.6; }
+        .insights { background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); border-radius: 10px; padding: 0.8rem; margin-top: 0.8rem; }
+        .insights-title { font-size: 0.8rem; font-weight: 600; color: var(--primary); margin-bottom: 0.4rem; }
+        .insights-text { font-size: 0.85rem; color: var(--text); }
+        .trends { background: var(--card-bg); border-radius: 16px; padding: 2rem; margin-top: 2rem; }
+        .trends h2 { color: var(--primary); margin-bottom: 1rem; }
+        .trend-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; text-align: center; }
+        .trend-item { padding: 1rem; background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.05)); border-radius: 12px; }
+        .trend-label { font-size: 0.85rem; color: var(--text-light); }
+        .trend-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .footer { text-align: center; padding: 2rem; color: var(--text-light); font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 微博热搜 Top 10 分析报告</h1>
+            <p class="meta">📅 2026-01-18 21:31 | 数据来源：微博官方 API</p>
+        </div>
+        <div class="overview-table">
+            <h2>📊 热搜总览</h2>
+            <table>
+                <tr><th>排名</th><th>热搜话题</th><th>热度</th><th>分类</th></tr>
+                <tr><td>1</td><td>🔥 某明星官宣恋情</td><td>1000万</td><td><span class="badge badge-entertainment">娱乐</span></td></tr>
+                <tr><td>2</td><td>新能源汽车政策发布</td><td>888.9万</td><td><span class="badge badge-tech">科技</span></td></tr>
+                <tr><td>3</td><td>高考成绩公布</td><td>777.8万</td><td><span class="badge badge-society">社会</span></td></tr>
+                <tr><td>4</td><td>🆕 国足世预赛</td><td>666.7万</td><td><span class="badge badge-sports">体育</span></td></tr>
+                <tr><td>5</td><td>A股大涨</td><td>555.6万</td><td><span class="badge badge-finance">财经</span></td></tr>
+                <tr><td>6</td><td>某电影票房破10亿</td><td>444.4万</td><td><span class="badge badge-entertainment">娱乐</span></td></tr>
+                <tr><td>7</td><td>AI大模型发布</td><td>333.3万</td><td><span class="badge badge-tech">科技</span></td></tr>
+                <tr><td>8</td><td>台风预警</td><td>222.2万</td><td><span class="badge badge-society">社会</span></td></tr>
+                <tr><td>9</td><td>NBA总决赛</td><td>111.1万</td><td><span class="badge badge-sports">体育</span></td></tr>
+                <tr><td>10</td><td>某明星新歌上线</td><td>100万</td><td><span class="badge badge-entertainment">娱乐</span></td></tr>
+            </table>
+        </div>
+        <h2 style="color: var(--primary); margin-bottom: 1rem;">🔍 深度分析</h2>
+        <div class="cards">
+            <div class="card">
+                <div class="card-header"><div class="rank">1</div><div class="card-title">某明星官宣恋情</div><span class="badge badge-entertainment">娱乐</span></div>
+                <div class="hot-value">🔥 热度 1000万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">当红明星官宣恋情引爆全网讨论，粉丝反应两极分化，祝福与脱粉声并存。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">情侣品牌借势营销、明星周边电商、八卦娱乐内容创作</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">2</div><div class="card-title">新能源汽车政策发布</div><span class="badge badge-tech">科技</span></div>
+                <div class="hot-value">🔴 热度 888.9万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">国家发布新能源汽车扶持政策，涵盖补贴延续、充电设施建设，产业链重大利好。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">汽车配件电商、政策解读内容创作、汽车品类广告高效期</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">3</div><div class="card-title">高考成绩公布</div><span class="badge badge-society">社会</span></div>
+                <div class="hot-value">🔴 热度 777.8万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">全国高考成绩陆续公布，分数线、学霸故事、志愿填报成为热门话题。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">教育服务、大学用品电商、志愿填报指南内容</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">4</div><div class="card-title">国足世预赛</div><span class="badge badge-sports">体育</span></div>
+                <div class="hot-value">🆕 热度 666.7万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">国足世预赛关键战役引发全民关注，球迷情绪复杂，调侃内容传播广泛。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">运动品牌借势、球衣周边电商</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">5</div><div class="card-title">A股大涨</div><span class="badge badge-finance">财经</span></div>
+                <div class="hot-value">📈 热度 555.6万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">A股市场大幅上涨，科技、新能源板块领涨，投资者情绪高涨。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">股市分析内容、券商理财App获客黄金期</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">6</div><div class="card-title">某电影票房破10亿</div><span class="badge badge-entertainment">娱乐</span></div>
+                <div class="hot-value">🎬 热度 444.4万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">国产大片票房破10亿创纪录，口碑两极但热度不减，IP话题持续发酵。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">电影周边电商、影评解说内容创作</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">7</div><div class="card-title">AI大模型发布</div><span class="badge badge-tech">科技</span></div>
+                <div class="hot-value">🤖 热度 333.3万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">国内科技巨头发布新一代AI大模型，多项测试达国际先进水平。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">AI工具教程内容、智能硬件电商</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">8</div><div class="card-title">台风预警</div><span class="badge badge-society">社会</span></div>
+                <div class="hot-value">🌀 热度 222.2万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">沿海地区进入防御状态，航班取消、景区关闭，公众防灾意识提升。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">应急物资电商（注意：不宜过度商业化）</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">9</div><div class="card-title">NBA总决赛</div><span class="badge badge-sports">体育</span></div>
+                <div class="hot-value">🏀 热度 111.1万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">NBA总决赛白热化，巨星表现引发国内球迷热烈讨论。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">NBA周边电商、赛事解说内容</p></div>
+            </div>
+            <div class="card">
+                <div class="card-header"><div class="rank">10</div><div class="card-title">某明星新歌上线</div><span class="badge badge-entertainment">娱乐</span></div>
+                <div class="hot-value">🎵 热度 100万</div>
+                <div class="section-title">核心摘要</div>
+                <p class="summary">人气歌手发布新单曲，粉丝打榜热情高涨，新歌风格成讨论焦点。</p>
+                <div class="insights"><div class="insights-title">💰 商业化洞察</div><p class="insights-text">专辑周边电商、翻唱舞蹈挑战内容</p></div>
+            </div>
+        </div>
+        <div class="trends">
+            <h2>📈 今日热搜分类趋势</h2>
+            <div class="trend-grid">
+                <div class="trend-item"><div class="trend-value">30%</div><div class="trend-label">娱乐</div></div>
+                <div class="trend-item"><div class="trend-value">20%</div><div class="trend-label">科技</div></div>
+                <div class="trend-item"><div class="trend-value">20%</div><div class="trend-label">社会</div></div>
+                <div class="trend-item"><div class="trend-value">20%</div><div class="trend-label">体育</div></div>
+                <div class="trend-item"><div class="trend-value">10%</div><div class="trend-label">财经</div></div>
+            </div>
+        </div>
+        <div class="footer">
+            📌 本报告由 Weibo Hot Analyzer 自动生成 | 🤖 数据分析时间：2026-01-18 21:31
+        </div>
+    </div>
+</body>
+</html>
