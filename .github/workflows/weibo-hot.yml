@@ -57,15 +57,18 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # 拉取最新代码
-          git fetch origin main
-          git rebase origin/main
-
           # 检查是否有新报告生成
           if [ -n "$(git status --porcelain docs/)" ]; then
+            # 先提交本地改动
             git add docs/
-            git commit -m "微博热搜报告 $(date +%Y-%m-%d)"
-            git push
+            git commit -m "📊 微博热搜报告 $(date +%Y-%m-%d)"
+            
+            # 拉取最新代码并 rebase
+            git fetch origin main
+            git rebase origin/main
+            
+            # 推送
+            git push origin main
             echo "✅ 报告已更新并推送"
           else
             echo "ℹ️ 暂无新报告生成"
