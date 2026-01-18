@@ -12,6 +12,7 @@ import sys
 from datetime import datetime
 from urllib.request import urlopen, Request
 from urllib.error import URLError, HTTPError
+from urllib.parse import quote
 
 # 支持环境变量覆盖默认值
 WEIBO_API_KEY = os.environ.get("WEIBO_API_KEY", "84312028a068cdebe51762a507a935cc")
@@ -57,7 +58,7 @@ def fetch_weibo_hot_search():
         "Accept": "application/json, text/plain, */*",
         "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
         "Referer": "https://weibo.com/",
-        "Cookie": f"SUB={WEIBO_API_KEY}"
+        "Cookie": f"SUB={quote(WEIBO_API_KEY, safe='')}"
     }
     
     try:
