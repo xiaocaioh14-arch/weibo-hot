@@ -32,39 +32,27 @@ def get_claude_analysis(client, topics: list) -> str:
         for t in topics
     ])
 
-    prompt = f"""请对以下微博热搜 Top 10 进行深度分析，生成商业化洞察报告。
+    prompt = f"""请对以下微博热搜 Top 10 进行简要分析。
 
 ## 热搜话题
 {topics_text}
 
-## 分析要求
-对每条热搜输出以下内容：
-1. **核心摘要** (50-100字)
-2. **关键要点** (3-5个核心信息点)
-3. **商业化洞察** (品牌营销、电商选品、内容创作、广告投放、IP衍生等机会，或"无明显商业化机会")
-
-## 整体分析
-最后提供：
-- 热搜趋势洞察
-- 商业化机会汇总
-
-## 输出格式
-请以 JSON 格式输出，结构如下：
+## 输出要求（每条只输出3个要点）
+请以 JSON 格式输出：
 {{
     "analyses": [
         {{
             "rank": 1,
             "title": "话题标题",
             "category": "分类",
-            "summary": "核心摘要",
+            "summary": "20字以内摘要",
             "key_points": ["要点1", "要点2", "要点3"],
-            "commercial": "商业化洞察"
+            "commercial": "商业化机会或无"
         }}
     ],
-    "trend_insight": "趋势洞察分析",
-    "commercial_summary": "商业化机会汇总"
+    "trend_insight": "一句话趋势洞察",
+    "commercial_summary": "一句话商业汇总"
 }}
-
 只输出 JSON，不要有其他内容。"""
 
     response = client.messages.create(
