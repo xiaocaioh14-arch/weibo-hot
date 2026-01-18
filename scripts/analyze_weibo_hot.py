@@ -298,11 +298,38 @@ def main():
             raw_analysis = raw_analysis[7:-3]
         elif raw_analysis.startswith("```"):
             raw_analysis = raw_analysis[3:-3]
-        analysis = json.loads(raw_analysis)
+        # 尝试修复截断的 JSON
+        try:
+            analysis = json.loads(raw_analysis)
+        except json.JSONDecodeError:
+            # 尝试找到完整的 JSON 结构
+            import re
+            # 尝试提取 analyses 数组
+            analyses_match = re.search(r'"analyses"\s*:\s*\[([\s\S]*?)\]', raw_analysis)
+            if analyses_match:
+                # 重建 JSON
+                raw_analysis = '{"analyses": [' + analyses_match.group(1) + ']}'
+            # 尝试找到 trend_insight 和 commercial_summary
+            trend_match = re.search(r'"trend_insight"\s*:\s*"([^"]*)"', raw_analysis)
+            comm_match = re.search(r'"commercial_summary"\s*:\s*"([^"]*)"', raw_analysis)
+            if trend_match and comm_match:
+                analysis = {
+                    "analyses": [],
+                    "trend_insight": trend_match.group(1),
+                    "commercial_summary": comm_match.group(1)
+                }
+                # 从原始输出中提取 analyses
+                try:
+                    analyses_data = json.loads('{"analyses": [' + analyses_match.group(1) + ']}')
+                    analysis["analyses"] = analyses_data["analyses"]
+                except:
+                    pass
+            else:
+                raise json.JSONDecodeError("无法修复截断的 JSON", raw_analysis, 0)
         print("✅ Claude 分析完成")
     except json.JSONDecodeError as e:
         print(f"❌ Claude 返回格式错误: {e}")
-        print(f"原始输出:\n{raw_analysis[:500]}")
+        print(f"原始输出:\n{raw_analysis[:800]}")
         sys.exit(1)
 
     # 3. 生成报告
