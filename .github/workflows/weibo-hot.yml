@@ -56,6 +56,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+          # 拉取最新代码
+          git fetch origin main
+          git rebase origin/main
+
           # 检查是否有新报告生成
           if [ -n "$(git status --porcelain docs/)" ]; then
             git add docs/
