@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 
-def send_to_feishu(webhook_url: str, title: str, md_content: str):
+def send_to_feishu(webhook_url: str, title: str, md_content: str, html_url: str = None):
     """发送 Markdown 内容到飞书"""
     import requests
 
@@ -18,16 +18,32 @@ def send_to_feishu(webhook_url: str, title: str, md_content: str):
     if len(md_content) > max_length:
         md_content = md_content[:max_length] + "\n\n...（内容过长，请查看完整报告）"
 
+    # 构建按钮
+    buttons = []
+    if html_url:
+        buttons.append({
+            "tag": "button",
+            "text": {"tag": "plain_text", "text": "📊 查看 HTML 报告"},
+            "url": html_url,
+            "type": "primary"
+        })
+    buttons.append({
+        "tag": "button",
+        "text": {"tag": "plain_text", "text": "📁 查看全部报告"},
+        "url": "https://xiaocaioh14-arch.github.io/weibo-hot/"
+    })
+
     payload = {
         "msg_type": "interactive",
         "card": {
             "config": {"wide_screen_mode": True},
+            "header": {
+                "title": {"tag": "plain_text", "content": title},
+                "template": "purple"
+            },
             "elements": [
-                {"tag": "div", "text": {"tag": "plain_text", "text": title}},
                 {"tag": "div", "text": {"tag": "lark_md", "content": md_content}},
-                {"tag": "action", "elements": [
-                    {"tag": "button", "text": {"tag": "plain_text", "text": "📊 查看网页版报告"}, "url": "https://xiaocaioh14-arch.github.io/weibo-hot/"}
-                ]}
+                {"tag": "action", "elements": buttons}
             ]
         }
     }
@@ -68,6 +84,11 @@ if __name__ == "__main__":
     with open(md_file, "r", encoding="utf-8") as f:
         md_content = f.read()
 
-    title = f"📊 微博热搜分析报告 - {timestamp.replace('_', ' ')}"
+    title = f"📊 微博热搜分析报告 - {timestamp.replace('-', '/').replace('_', ' ')}"
+    
+    # 生成 HTML 报告 URL
+    html_filename = Path(md_file).stem + ".html"
+    html_url = f"https://xiaocaioh14-arch.github.io/weibo-hot/{html_filename}"
 
-    send_to_feishu(webhook_url, title, md_content)
+    send_to_feishu(webhook_url, title, md_content, html_url)
+
