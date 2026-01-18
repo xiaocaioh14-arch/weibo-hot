@@ -38,6 +38,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install requests
 
       - name: Run Weibo Hot Analysis
         id: analysis
@@ -69,6 +70,24 @@ jobs:
           else
             echo "ℹ️ 暂无新报告生成"
           fi
+
+      - name: Notify Feishu
+        if: success()
+        run: |
+          # 获取最新的报告文件
+          latest_md=$(ls -t docs/weibo-hot-*.md 2>/dev/null | head -1)
+
+          if [ -n "$latest_md" ]; then
+            # 获取时间戳
+            timestamp=$(basename "$latest_md" .md | sed 's/weibo-hot-//')
+
+            # 推送 Markdown 报告到飞书
+            python scripts/notify_feishu.py "$latest_md" "$timestamp"
+          else
+            echo "⚠️ 未找到报告文件，跳过飞书通知"
+          fi
+        env:
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
 
       - name: Notify on failure
         if: failure()
