@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微博热搜 Top 10 分析报告 - 2026-01-18-14-45</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 2026 前沿浅色主题配色 */
+            --primary: #667eea;
+            --primary-light: #818cf8;
+            --primary-dark: #4f46e5;
+            --secondary: #f472b6;
+            --accent: #06b6d4;
+            
+            /* 背景色系 */
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.7);
+            --bg-glass-hover: rgba(255, 255, 255, 0.9);
+            
+            /* 文字色系 */
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            
+            /* 边框和阴影 */
+            --border: rgba(148, 163, 184, 0.2);
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-glass: 0 8px 32px rgba(102, 126, 234, 0.15);
+            
+            /* 圆角 */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+            
+            /* 动效 */
+            --transition-fast: 150ms ease;
+            --transition-normal: 250ms ease;
+            --transition-slow: 350ms ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #e2e8f0 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* 背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.08) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -50%;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(244, 114, 182, 0.06) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* 头部区域 */
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: var(--shadow-md);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0.7;
+        }
+
+        /* 热搜总览卡片 */
+        .overview-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 48px;
+            box-shadow: var(--shadow-glass);
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 2px;
+        }
+
+        /* 热搜列表表格 */
+        .hot-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .hot-table th {
+            text-align: left;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hot-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            transition: var(--transition-fast);
+        }
+
+        .hot-table tr:hover td {
+            background: var(--bg-glass-hover);
+        }
+
+        .rank-badge {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .rank-1 { background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; }
+        .rank-2 { background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%); color: white; }
+        .rank-3 { background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; }
+        .rank-other { background: var(--bg-primary); color: var(--text-secondary); }
+
+        .topic-title {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .topic-label {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .label-hot { background: #fef2f2; color: #dc2626; }
+        .label-new { background: #f0fdf4; color: #16a34a; }
+        .label-fei { background: #fef3c7; color: #d97706; }
+
+        .category-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .cat-娱乐 { background: #fce7f3; color: #be185d; }
+        .cat-社会 { background: #dbeafe; color: #1d4ed8; }
+        .cat-科技 { background: #d1fae5; color: #047857; }
+        .cat-体育 { background: #fee2e2; color: #dc2626; }
+        .cat-财经 { background: #fef3c7; color: #b45309; }
+        .cat-自然灾害 { background: #fef3c7; color: #b45309; }
+        .cat-其他 { background: #f1f5f9; color: #475569; }
+
+        .hot-value {
+            font-weight: 500;
+            color: var(--primary);
+        }
+
+        /* 深度分析卡片 */
+        .analysis-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .analysis-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-normal);
+        }
+
+        .analysis-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .card-rank {
+            flex-shrink: 0;
+        }
+
+        .card-title-area {
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .card-section {
+            margin-bottom: 20px;
+        }
+
+        .card-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-section-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .summary-text {
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .key-points {
+            list-style: none;
+        }
+
+        .key-points li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: var(--text-primary);
+        }
+
+        .key-points li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+        }
+
+        .commercial-insight {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(244, 114, 182, 0.08) 100%);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .no-commercial {
+            background: var(--bg-primary);
+            border-left-color: var(--text-muted);
+            color: var(--text-secondary);
+        }
+
+        /* 趋势洞察 */
+        .insight-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 48px;
+        }
+
+        .insight-card .section-title {
+            color: white;
+        }
+
+        .insight-card .section-title::before {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .insight-content {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        /* 商业化机会汇总 */
+        .opportunities-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            box-shadow: var(--shadow-glass);
+        }
+
+        .opportunity-item {
+            display: flex;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .opportunity-item:last-child {
+            border-bottom: none;
+        }
+
+        .opportunity-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .opportunity-content h4 {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .opportunity-content p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .meta-info {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .hot-table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            .overview-card,
+            .analysis-card,
+            .insight-card,
+            .opportunities-card {
+                padding: 20px;
+            }
+        }
+
+        /* 打印样式 */
+        @media print {
+            body {
+                background: white;
+            }
+
+            body::before,
+            body::after {
+                display: none;
+            }
+
+            .analysis-card:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🔥</div>
+            </div>
+            <h1>微博热搜 Top 10 分析报告</h1>
+            <div class="meta-info">
+                <div class="meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>2026-01-18-14-45</span>
+                </div>
+                <div class="meta-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <span>数据来源：微博官方 API</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 热搜总览 -->
+        <section class="overview-card">
+            <h2 class="section-title">📊 热搜总览</h2>
+            <table class="hot-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>热搜话题</th>
+                        <th>分类</th>
+                        <th>热度</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+        <tr>
+            <td><span class="rank-badge rank-1">1</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%235名外卖员将手指砸骨折骗保32万%23" target="_blank" class="topic-title">5名外卖员将手指砸骨折骗保32万</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">116.9万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-2">2</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%23轧戏%23" target="_blank" class="topic-title">轧戏</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">84.0万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-3">3</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%23这个全球单一国家首次说明什么%23" target="_blank" class="topic-title">这个全球单一国家首次说明什么</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">65.9万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-other">4</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%23Prada米兰男装秀%23" target="_blank" class="topic-title">Prada米兰男装秀</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">65.3万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-other">5</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%23梁小龙去世%23" target="_blank" class="topic-title">梁小龙去世</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">59.2万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-other">6</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%23俄罗斯一地暴雪堆出公寓楼高雪坡%23" target="_blank" class="topic-title">俄罗斯一地暴雪堆出公寓楼高雪坡</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">38.1万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-other">7</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%236人就餐仅花19元老板要求带走垃圾%23" target="_blank" class="topic-title">6人就餐仅花19元老板要求带走垃圾</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">37.5万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-other">8</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%23婴儿淋雨哭到撕心裂肺谁能忍%23" target="_blank" class="topic-title">婴儿淋雨哭到撕心裂肺谁能忍</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">34.8万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-other">9</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%23美国童星疑闯红灯被拖行致死%23" target="_blank" class="topic-title">美国童星疑闯红灯被拖行致死</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">34.4万</td>
+        </tr>
+        
+        <tr>
+            <td><span class="rank-badge rank-other">10</span></td>
+            <td>
+                <a href="https://s.weibo.com/weibo?q=%2326岁女子两月暴瘦30斤成糖尿病前期%23" target="_blank" class="topic-title">26岁女子两月暴瘦30斤成糖尿病前期</a>
+                
+                
+                
+            </td>
+            <td><span class="category-tag cat-其他">其他</span></td>
+            <td class="hot-value">27.4万</td>
+        </tr>
+        
+                </tbody>
+            </table>
+        </section>
+
+        <!-- 深度分析 -->
+        <section style="margin-bottom: 48px;">
+            <h2 class="section-title">🔍 深度分析</h2>
+            <div class="analysis-grid">
+                
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-1" style="width: 40px; height: 40px; font-size: 1rem;">1</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">5名外卖员将手指砸骨折骗保32万</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-社会法制">社会法制</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">外卖员自残骗保32万被抓</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>外卖行业生存压力引发犯罪</li><li>骗保手法恶劣但结局反转</li><li>引发对底层劳动者权益关注</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">无</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-2" style="width: 40px; height: 40px; font-size: 1rem;">2</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">轧戏</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-娱乐产业">娱乐产业</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">轧戏现象引行业反思</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>演员同时拍多部戏成常态</li><li>流量明星轧戏引争议</li><li>暴露影视制作深层问题</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">无</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-3" style="width: 40px; height: 40px; font-size: 1rem;">3</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">这个全球单一国家首次说明什么</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-国际政治">国际政治</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">某国创造全球首例引关注</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>中国在特定领域实现突破</li><li>单一国家首次意义重大</li><li>引发国际社会广泛讨论</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">无</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-4" style="width: 40px; height: 40px; font-size: 1rem;">4</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">Prada米兰男装秀</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-时尚潮流">时尚潮流</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">Prada米兰男装周引关注</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>国际奢侈品牌动态受关注</li><li>时尚行业复苏信号</li><li>明星看秀成社交话题</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">奢侈品营销合作机会</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-5" style="width: 40px; height: 40px; font-size: 1rem;">5</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">梁小龙去世</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-娱乐人物">娱乐人物</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">演员梁小龙离世引缅怀</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>经典角色承载集体记忆</li><li>武侠演员离世引怀旧潮</li><li>老艺人晚年生活受关注</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">无</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-6" style="width: 40px; height: 40px; font-size: 1rem;">6</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">俄罗斯一地暴雪堆出公寓楼高雪坡</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-国际奇闻">国际奇闻</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">俄罗斯暴雪形成高雪坡</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>极端天气引发全球关注</li><li>视觉冲击强传播力高</li><li>气候异常话题持续升温</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">气象服务品牌合作机会</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-7" style="width: 40px; height: 40px; font-size: 1rem;">7</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">6人就餐仅花19元老板要求带走垃圾</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-社会民生">社会民生</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">低价消费引垃圾处理争议</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>消费观念与商家利益冲突</li><li>规则边界引发讨论</li><li>低收入群体消费困境</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">无</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-8" style="width: 40px; height: 40px; font-size: 1rem;">8</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">婴儿淋雨哭到撕心裂肺谁能忍</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-社会情感">社会情感</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">婴儿淋雨视频引热议</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>情感营销内容易引发传播</li><li>善恶判断成讨论焦点</li><li>网络视频真实性受质疑</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">母婴品牌情感营销机会</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-9" style="width: 40px; height: 40px; font-size: 1rem;">9</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">美国童星疑闯红灯被拖行致死</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-国际社会">国际社会</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">美国童星意外身亡引关注</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>悲剧事件传播力强</li><li>跨国新闻受国内关注</li><li>交通安全话题再引讨论</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">无</div>
+            </div>
+        </div>
+        
+        <div class="analysis-card">
+            <div class="card-header">
+                <div class="card-rank">
+                    <span class="rank-badge rank-10" style="width: 40px; height: 40px; font-size: 1rem;">10</span>
+                </div>
+                <div class="card-title-area">
+                    <div class="card-title">26岁女子两月暴瘦30斤成糖尿病前期</div>
+                    <div class="card-meta">
+                        <span class="category-tag cat-健康养生">健康养生</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">核心摘要</div>
+                <p class="summary-text">极端减肥致健康危机</p>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">关键要点</div>
+                <ul class="key-points"><li>减肥焦虑引发健康隐患</li><li>极端案例警示作用强</li><li>健康生活方式需求上升</li></ul>
+            </div>
+            <div class="card-section">
+                <div class="card-section-title">💰 商业化洞察</div>
+                <div class="commercial-insight ">健康品牌、减肥产品合作机会</div>
+            </div>
+        </div>
+        
+            </div>
+        </section>
+
+        <!-- 趋势洞察 -->
+        <section class="insight-card">
+            <h2 class="section-title">📈 趋势洞察</h2>
+            <div class="insight-content">
+                热搜呈现情感化、视觉化趋势，社会民生与健康话题关注度上升，极端案例和情感冲突内容更易引发传播。
+            </div>
+        </section>
+
+        <!-- 商业化机会汇总 -->
+        <section class="opportunities-card">
+            <h2 class="section-title">💼 商业化机会汇总</h2>
+            <div class="opportunities-list">
+                
+        <div class="opportunity-item">
+            <div class="opportunity-icon">🔍</div>
+            <div class="opportunity-content">
+                <h4>5名外卖员将手指砸骨折骗保32万</h4>
+                <p>无</p>
+            </div>
+        </div>
+        
+        <div class="opportunity-item">
+            <div class="opportunity-icon">🔍</div>
+            <div class="opportunity-content">
+                <h4>轧戏</h4>
+                <p>无</p>
+            </div>
+        </div>
+        
+        <div class="opportunity-item">
+            <div class="opportunity-icon">🔍</div>
+            <div class="opportunity-content">
+                <h4>这个全球单一国家首次说明什么</h4>
+                <p>无</p>
+            </div>
+        </div>
+        
+        <div class="opportunity-item">
+            <div class="opportunity-icon">🔍</div>
+            <div class="opportunity-content">
+                <h4>Prada米兰男装秀</h4>
+                <p>奢侈品营销合作机会</p>
+            </div>
+        </div>
+        
+        <div class="opportunity-item">
+            <div class="opportunity-icon">🔍</div>
+            <div class="opportunity-content">
+                <h4>梁小龙去世</h4>
+                <p>无</p>
+            </div>
+        </div>
+        
+            </div>
+        </section>
+
+        <footer>
+            <p>由 <a href="#">Weibo Hot Analyzer Skill</a> 自动生成 · Powered by Claude</p>
+        </footer>
+    </div>
+</body>
+</html>
