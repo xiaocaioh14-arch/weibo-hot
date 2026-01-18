@@ -117,7 +117,7 @@ def generate_html_report(topics: list, analysis: dict, timestamp: str) -> str:
                 {f'<span class="topic-label label-new">新</span>' if t.get('is_new') else ''}
                 {f'<span class="topic-label label-fei">沸</span>' if t.get('is_fei') else ''}
             </td>
-            <td><span class="category-tag cat-{t['category']}">{t['category']}</span></td>
+            <td><span class="category-tag cat-{t['category'].replace(' ', '-')}">{t['category']}</span></td>
             <td class="hot-value">{format_hot_value(t['hot_value'])}</td>
         </tr>
         """
@@ -138,7 +138,7 @@ def generate_html_report(topics: list, analysis: dict, timestamp: str) -> str:
                 <div class="card-title-area">
                     <div class="card-title">{item['title']}</div>
                     <div class="card-meta">
-                        <span class="category-tag cat-{item['category']}">{item['category']}</span>
+                        <span class="category-tag cat-{item['category'].replace(' ', '-')}">{item['category']}</span>
                     </div>
                 </div>
             </div>
@@ -169,7 +169,8 @@ def generate_html_report(topics: list, analysis: dict, timestamp: str) -> str:
 
     opportunities_html = ""
     for i, opp in enumerate(opportunities[:5]):
-        icon = {"娱乐": "🎭", "科技": "💻", "社会": "📢", "体育": "⚽", "财经": "💰", "其他": "🔍"}[opp["category"]]
+        icon_map = {"娱乐": "🎭", "科技": "💻", "社会": "📢", "体育": "⚽", "财经": "💰", "自然灾害": "🌍", "其他": "🔍"}
+        icon = icon_map.get(opp["category"], "🔍")
         opportunities_html += f"""
         <div class="opportunity-item">
             <div class="opportunity-icon">{icon}</div>
