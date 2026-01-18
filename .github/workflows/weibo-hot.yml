@@ -57,8 +57,8 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           # 检查是否有新报告生成
-          if [ -n "$(git status --porcelain weibo-hot-reports/)" ]; then
-            git add weibo-hot-reports/
+          if [ -n "$(git status --porcelain docs/)" ]; then
+            git add docs/
             git commit -m "微博热搜报告 $(date +%Y-%m-%d)"
             git push
             echo "✅ 报告已更新并推送"

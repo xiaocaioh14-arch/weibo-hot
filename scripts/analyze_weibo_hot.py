@@ -21,7 +21,7 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 ANTHROPIC_BASE_URL = os.environ.get("ANTHROPIC_BASE_URL", "")  # 第三方 API 地址
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")  # 模型名称
 DEBUG = os.environ.get("DEBUG", "false").lower() == "true"
-OUTPUT_DIR = Path("weibo-hot-reports")
+OUTPUT_DIR = Path("docs")
 
 
 def get_claude_analysis(client, topics: list) -> str:
