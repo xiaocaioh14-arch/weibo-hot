@@ -98,7 +98,9 @@ def get_claude_analysis(client, topics: list) -> str:
 
 def generate_html_report(topics: list, analysis: dict, timestamp: str) -> str:
     """生成 HTML 报告"""
-    template_path = Path(__file__).parent / ".." / "assets" / "report-template.html"
+    # 模板在 .agent/skills/weibo-hot-analyzer/assets/ 目录下
+    repo_root = Path(__file__).parent.parent
+    template_path = repo_root / ".agent" / "skills" / "weibo-hot-analyzer" / "assets" / "report-template.html"
     with open(template_path, "r", encoding="utf-8") as f:
         template = f.read()
 
