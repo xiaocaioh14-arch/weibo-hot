@@ -84,11 +84,57 @@ if __name__ == "__main__":
     with open(md_file, "r", encoding="utf-8") as f:
         md_content = f.read()
 
+    # 生成精简版内容（只保留 Top 3 分析）
+    import re
+    
+    def create_short_content(full_content: str) -> str:
+        """从完整 Markdown 中提取精简版内容（仅前 3 条）"""
+        lines = full_content.split('\n')
+        short_lines = []
+        
+        # 保留标题和概览表格
+        in_table = False
+        table_row_count = 0
+        analysis_count = 0
+        skip_until_next_section = False
+        
+        for line in lines:
+            # 跳过深度分析部分的第 4 条及之后
+            if line.startswith('### 🥇 第 4 名') or line.startswith('### 🥈 第 4 名') or line.startswith('### 🥉 第 4 名'):
+                skip_until_next_section = True
+            if re.match(r'^### 🥇 第 [456789]|10 名', line) or re.match(r'^### .* 第 [456789]|10 名', line):
+                skip_until_next_section = True
+            
+            # 遇到趋势洞察章节，恢复输出
+            if line.startswith('## 📈 趋势洞察') or line.startswith('## 💼 商业化'):
+                skip_until_next_section = False
+            
+            if skip_until_next_section:
+                continue
+            
+            # 表格只保留前 3 行数据
+            if line.startswith('|'):
+                if '排名' in line or '---' in line:
+                    short_lines.append(line)
+                elif table_row_count < 3:
+                    short_lines.append(line)
+                    table_row_count += 1
+                continue
+            
+            short_lines.append(line)
+        
+        result = '\n'.join(short_lines)
+        # 添加引导文案
+        result += "\n\n---\n> 📱 **点击下方按钮查看完整 Top 10 分析报告**"
+        return result
+    
+    short_content = create_short_content(md_content)
+
     title = f"📊 微博热搜分析报告 - {timestamp.replace('-', '/').replace('_', ' ')}"
     
     # 生成 HTML 报告 URL
     html_filename = Path(md_file).stem + ".html"
     html_url = f"https://xiaocaioh14-arch.github.io/weibo-hot/{html_filename}"
 
-    send_to_feishu(webhook_url, title, md_content, html_url)
+    send_to_feishu(webhook_url, title, short_content, html_url)
 
